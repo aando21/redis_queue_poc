@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "redis-queue-poc"
+version = "0.1.0"
+description = ""
+authors = ["Alberto Yoshiyuki Ando Lafuente <alberto.ando@ext.quant.global>"]
+readme = "README.md"
+packages = [{include = "redis_queue_poc"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+redis = "^5.0.0"
+fastapi = "^0.103.1"
+uvicorn = "^0.23.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
