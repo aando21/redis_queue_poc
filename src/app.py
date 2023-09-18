@@ -38,28 +38,31 @@ async def check_result(job_id: str):
     # Fetch the job result from the queue
     hash_results = db.hgetall(config.REDIS_RESULT_HASH_NAME)
     hash_results = {key.decode(): value.decode() for key, value in hash_results.items()}
-    if job_id in hash_results and hash_results[job_id]=='working in progress':
+    if job_id in hash_results and hash_results[job_id] == "working in progress":
         return {"status": "Job is running. Try again in a few seconds."}
     elif job_id in hash_results:
         result = await redis_result_hash_pop(db, job_id)
         result = json.loads(result.decode())
-        return {"status": "Job finished", "result": result['result']}
+        return {"status": "Job finished", "result": result["result"]}
 
     pending_tasks = db.lrange(config.REDIS_TASK_QUEUE_NAME, 0, -1)
     for i, task in enumerate(pending_tasks):
-        task_id = json.loads(task.decode())['id']
+        task_id = json.loads(task.decode())["id"]
         if task_id == job_id:
             position = i
             tasks_ahead = len(pending_tasks) - position - 1
             return {
                 "status": "Job is pending",
                 "tasks_ahead": tasks_ahead,
-                'estimated_time': tasks_ahead * config.TIME_OF_TASK_EXECUTION
+                "estimated_time": tasks_ahead * config.TIME_OF_TASK_EXECUTION,
             }
 
-    return{ "status": "Job not found. It may be running or failed. Try again in 30 seconds."}
+    return {
+        "status": "Job not found. It may be running or failed. Try again in 30 seconds."
+    }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, port=8000)

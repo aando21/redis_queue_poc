@@ -34,12 +34,10 @@ def redis_result_queue_pop(db):
 async def redis_result_hash_pop(db, key):
     message = db.hget(config.REDIS_RESULT_HASH_NAME, key)
     if message:
-        json.loads(message.decode('utf-8'))
+        json.loads(message.decode("utf-8"))
         db.hdel(config.REDIS_RESULT_HASH_NAME, key)
     return message
 
 
 def redis_result_hash_push(db, key, message):
     db.hset(config.REDIS_RESULT_HASH_NAME, key, message)
-
-
