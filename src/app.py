@@ -27,7 +27,7 @@ async def add_task():
     job_id = str(uuid4())
     message = {
         "id": job_id,
-        "task": "perform_task",
+        "task": "src.redis_task.perform_task",
     }
     redis_task_queue_push(db, json.dumps(message))
     return {"message": "Task added to the queue", "job_id": job_id}
