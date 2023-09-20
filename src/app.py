@@ -18,8 +18,17 @@ worker = Worker(db)
 
 @app.on_event("startup")
 async def startup_event():
+    # Clear the redis database on startup
+    db.flushdb()
+    # Start the worker in the background
     background = threading.Thread(target=worker.start_worker)
     background.start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    # Clear the redis database on shutdown
+    db.flushdb()
 
 
 @app.post("/add_task")
