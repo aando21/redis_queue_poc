@@ -26,7 +26,7 @@ class Worker:
             message = redis_task_queue_pop(self.db)
             if message:
                 message = json.loads(message)
-                logging.warning(f"Got message: {message}")
+                logging.info(f"Got message: {message}")
                 redis_result_hash_push(self.db, message["id"], "working in progress")
                 module, function = message["task"].rsplit(".", 1)
                 module = __import__(module, fromlist=[function])
