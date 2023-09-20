@@ -11,7 +11,17 @@ class Worker:
     def __init__(self, db: redis.Redis):
         self.db = db
 
-    async def run_main(self):
+    def start_worker(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.run_main())
+        except KeyboardInterrupt or asyncio.CancelledError:
+            pass
+        finally:
+            loop.close()
+
+    def run_main(self):
         while True:
             message = redis_task_queue_pop(self.db)
             if message:
@@ -21,16 +31,12 @@ class Worker:
                 module, function = message["task"].rsplit(".", 1)
                 module = __import__(module, fromlist=[function])
                 if message.get("kwargs"):
-                    result = await getattr(module, function)(
+                    result = getattr(module, function)(
                         task_id=message["id"], **message.get("kwargs")
                     )
                 else:
-                    result = await getattr(module, function)(task_id=message["id"])
-                await redis_result_hash_push(self.db, message["id"], json.dumps(result))
+                    result = getattr(module, function)(task_id=message["id"])
                 redis_result_hash_push(self.db, message["id"], json.dumps(result))
-            else:
-                # Unblocks the startup phase of the FastAPI app
-                await asyncio.sleep(1e-10)
 
 
 if __name__ == "__main__":
